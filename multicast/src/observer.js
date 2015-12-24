@@ -5,8 +5,9 @@ window.RTCSessionDescription = (window.mozRTCSessionDescription || window.RTCSes
 
 window.RTCIceCandidate = (window.mozRTCIceCandidate || window.RTCIceCandidate);
 
+var id = Math.random().toString(32).slice(-8);
 //websocket
-var ws = new WebSocket("ws:"+window.location.host+"/observer");
+var ws = new WebSocket("ws:"+window.location.host+"/observer"+id);
 ws.onmessage = onMessage;
 ws.onopen = createPeerConnection;
 
@@ -32,7 +33,7 @@ function createPeerConnection(){
 function onIceCandidate(e){
 	if(e.candidate){
 		console.log("candidate"+e.candidate);
-		ws.send(JSON.stringify(e.candidate));
+		sendMessage(JSON.stringify(e.candidate));
 	}else{
 		console.log(e);
 	}
@@ -46,11 +47,9 @@ function onRemoteStreamAdded(e){
 
 function gotOffer(offer){
 	console.log("gotOffer");
-	offer.id = "001";
 	console.log(offer);
 	pc.setLocalDescription(offer);
-	console.log(JSON.stringify(offer));
-	ws.send(JSON.stringify(offer));
+	sendMessage((offer));
 }
 
 
@@ -77,3 +76,9 @@ function onCandidate(message){
 	console.log("onCandidate");
 	pc.addIceCandidate(new RTCIceCandidate(message));
 }
+
+function sendMessage(message){
+	message = JSON.stringify(message)
+	ws.send(message.slice(0,1)+"\"id\":\""+id+"\","+message.slice(1))
+}
+

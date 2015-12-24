@@ -18,8 +18,9 @@ class YoutubersSocket(tornado.websocket.WebSocketHandler):
 	youtuber = []
 
 	def open(self):
-		print("youtuber is comming!")
-		self.__class__.youtuber.append(self)
+		if(len(self.__class__.youtuber)==0):
+			print("youtuber is comming!")
+			self.__class__.youtuber.append(self)
 
 	@classmethod
 	def _send_message(clt,message):
@@ -36,28 +37,31 @@ class YoutubersSocket(tornado.websocket.WebSocketHandler):
 
 class ObserversSocket(tornado.websocket.WebSocketHandler):
 
-	observers = []
+	observers = dict()
 
-	def open(self):
-		self.__class__.observers.append(self)
+	def open(self,ids):
+		self.__class__.observers[ids] = self
+		self.ids = ids
 		print("observer is comming!")
+		print("id:"+ids);
 
 	@classmethod
 	def _send_message(clt,message):
 		print("to observers:"+message)
-		map(lambda obs:obs.write_message(message),clt.observers)
-	
+#		map(lambda obs:obs.write_message(message),clt.observers)
+		clt.observers.get(json.loads(message).get("id")).write_message(message);
+
 	def on_message(self,message):
 		YoutubersSocket._send_message(message)
 
 	def on_close(self):
 		print("observer is got out!")
-		self.__class__.observers.remove(self)
+		self.__class__.observers.pop(self.ids)
 
 application = tornado.web.Application([
 	(r"/",MainHandler),
 	(r"/youtuber",YoutubersSocket),
-	(r"/observer",ObserversSocket),
+	(r"/observer(........)",ObserversSocket),
 	],
 	template_path=os.path.join(os.getcwd(),"templates"),
 	static_path=os.path.join(os.getcwd(),"src")

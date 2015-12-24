@@ -15,10 +15,11 @@ ws.onopen = requireUserMedia;
 //parameters
 var peerConnectionConfig = {"iceServers": [{"url":"stun:stun.l.google.com:19302"}]};
 
-
 var mediaConstraints ={'mandatory':{'OfferToReceiveAudio':false,'OfferToReceiveVideo':false}};
 
-var pc;
+//members
+var isStreamEnable = false;
+var pcs = {};
 var localMediaStream;
 
 function error(err){
@@ -35,46 +36,62 @@ function gotUserMedia(stream){
 	localMediaStream = stream;
 	document.getElementById("localVideo").src = window.URL.createObjectURL(stream);
 	document.getElementById("localVideo").src = window.URL.createObjectURL(stream);
-	createPeerConnection();
+	isStreamEnable = true;
 }
 
 function createPeerConnection(){
-	pc = new RTCPeerConnection(peerConnectionConfig);
-	pc.onicecandidate = onIceCandidate;
+	var pc = new RTCPeerConnection(peerConnectionConfig);
 	pc.addStream(localMediaStream);
+	return pc;
 }
 
-function onIceCandidate(e){
-	console.log("onIceCandidate");
-	if(e.candidate){
-	ws.send(JSON.stringify(e.candidate));
-	}
-	else{
-		console.log(e);
-	}
-}
+	
+
 //when message received
 function onMessage(message){
 	console.log("onMessage");
 	message = JSON.parse(message.data);
-	if(message.type ==="offer"){
-		onOffer(message);
-		console.log(message.id);
-	}
-	else if(message.candidate){
-		onCandidate(message);
+	if(message.id){
+		if(message.type ==="offer"){
+			onOffer(message);
+			console.log(message.id);
+		}
+		else if(message.candidate){
+			onCandidate(message);
+		}
 	}
 }
 
 function onOffer(message){
 	console.log("offer");
+	var pc = createPeerConnection();
 	pc.setRemoteDescription(new RTCSessionDescription(message));
-	pc.createAnswer(gotAnswer,error,mediaConstraints);
+	pcs[message.id] = pc;
+
+	pc.onicecandidate = function(e){
+		console.log("onIceCandidate");
+		if(e.candidate){
+			sendMessage(e.candidate,message.id);
+		}
+		else{
+			console.log(e);
+		}
+	}
+
+	pc.createAnswer(function(answer){
+		console.log("gotAnswer");
+		pc.setLocalDescription(answer);
+		sendMessage(answer,message.id);
+		},
+		error,mediaConstraints);
 }
 
-function gotAnswer(answer){
-	console.log("gotAnswer");
-	pc.setLocalDescription(answer);
-	ws.send(JSON.stringify(answer));
+function sendMessage(message,id){
+	message = JSON.stringify(message);
+	ws.send(message.slice(0,1)+"\"id\":\""+id+"\","+message.slice(1))
 }
 
+function onCandidate(message){
+	var pc = pcs[message.id];
+	pc.addIceCandidate(new RTCIceCandidate(message));
+}
