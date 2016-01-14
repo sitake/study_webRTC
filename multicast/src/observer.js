@@ -14,7 +14,10 @@ ws.onopen = createPeerConnection;
 //parameters
 var peerConnectionConfig = {"iceServers": [{"url":"stun:stun.l.google.com:19302"}]};
 
-var mediaConstraints ={'mandatory':{'OfferToReceiveAudio':true,'OfferToReceiveVideo':true}};
+var mediaConstraints = {
+	offerToReceiveAudio:true,
+	offerToReceiveVideo:true
+};
 
 //variables
 var pc;
@@ -28,6 +31,7 @@ function createPeerConnection(){
 	pc.onaddstream = onRemoteStreamAdded;
 
 	pc.createOffer(gotOffer,error,mediaConstraints);
+
 }
 
 function onIceCandidate(e){
