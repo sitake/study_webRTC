@@ -1,60 +1,54 @@
-//compatible to each blowser
+function p2pHost(roomInfo){
+
 window.RTCPeerConnection = (window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection);
-
 window.RTCSessionDescription = (window.mozRTCSessionDescription || window.RTCSessionDescription);
-
 window.RTCIceCandidate = (window.mozRTCIceCandidate || window.RTCIceCandidate);
-
 navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navitor.msGetUserMedia);
 
-//websocket
-var ws = new WebSocket("ws:"+window.location.host+"/youtuber");
-ws.onmessage=onMessage;
+var id = roomInfo.id;
+var ws = new WebSocket("ws:"+window.location.host+"/youtuber"+id);
+var ws_info = new WebSocket("ws:"+window.location.host+"/roominfo"+id);
+
+ws_info.onopen = function(){
+	ws_info.send(JSON.stringify(roomInfo));
+}
+
 ws.onopen = requireUserMedia;
+ws.onmessage = onMessage;
 
-//parameters
-var peerConnectionConfig = {"iceServers": [{"url":"stun:stun.l.google.com:19302"}]};
 
-var mediaConstraints ={'mandatory':{'OfferToReceiveAudio':false,'OfferToReceiveVideo':false}};
-
-//members
-var isStreamEnable = false;
 var pcs = {};
 var localMediaStream;
 
-function error(err){
-	console.log(err);
+function error(e){
+	console.log(e);
 }
 
 function requireUserMedia(){
 	navigator.getUserMedia({
 		video:true,audio:true
-	},gotUserMedia,error);
+		},gotUserMedia,error);
 }
 
 function gotUserMedia(stream){
 	localMediaStream = stream;
 	document.getElementById("localVideo").src = window.URL.createObjectURL(stream);
 	document.getElementById("localAudio").src = window.URL.createObjectURL(stream);
-	isStreamEnable = true;
 }
 
 function createPeerConnection(){
-	var pc = new RTCPeerConnection(peerConnectionConfig);
+	var pc = new RTCPeerConnection(new Object());
 	pc.addStream(localMediaStream);
 	return pc;
 }
 
-	
-
-//when message received
 function onMessage(message){
-	console.log("onMessage");
+	console.log(message.data);
 	message = JSON.parse(message.data);
-	if(message.id){
+	if(!message.to === id)return console.log("not to == id");
+	if(message.from){
 		if(message.type ==="offer"){
 			onOffer(message);
-			console.log(message.id);
 		}
 		else if(message.candidate){
 			onCandidate(message);
@@ -63,35 +57,34 @@ function onMessage(message){
 }
 
 function onOffer(message){
-	console.log("offer");
 	var pc = createPeerConnection();
 	pc.setRemoteDescription(new RTCSessionDescription(message));
-	pcs[message.id] = pc;
+	pcs[message.from] = pc;
 
 	pc.onicecandidate = function(e){
-		console.log("onIceCandidate");
 		if(e.candidate){
-			sendMessage(e.candidate,message.id);
-		}
-		else{
+			sendMessage(e.candidate,message.from);
+		}else{
 			console.log(e);
 		}
 	}
 
 	pc.createAnswer(function(answer){
-		console.log("gotAnswer");
 		pc.setLocalDescription(answer);
-		sendMessage(answer,message.id);
-		},
-		error,mediaConstraints);
+		sendMessage(answer,message.from);
+	},error,{offerToReceiveAudio:false,offerToReceiveVideo:false});
 }
 
-function sendMessage(message,id){
+function sendMessage(message,to){
 	message = JSON.stringify(message);
-	ws.send(message.slice(0,1)+"\"id\":\""+id+"\","+message.slice(1))
+	ws.send(message.slice(0,1)+"\"to\":\""+to+"\",\"from\":\""+id+"\","+message.slice(1));
 }
 
 function onCandidate(message){
-	var pc = pcs[message.id];
+	var pc = pcs[message.from];
 	pc.addIceCandidate(new RTCIceCandidate(message));
 }
+
+}
+
+module.exports = p2pHost;
