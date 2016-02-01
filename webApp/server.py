@@ -75,7 +75,7 @@ class RoomInfoSocket(tornado.websocket.WebSocketHandler):
 
 class GetRoomInfoSocket(tornado.websocket.WebSocketHandler):
     
-    def open(self): 
+    def on_message(self,message):
         print(json.dumps(RoomInfoSocket._get_roomInfos()))
         self.write_message(json.dumps(RoomInfoSocket._get_roomInfos()))
 

@@ -15,7 +15,6 @@ const Observer = React.createClass({
 	},
 
 	componentDidMount:function(){
-		console.log(this.props.roomInfo);
 		p2pClient(this.props.roomInfo);
 	},
 

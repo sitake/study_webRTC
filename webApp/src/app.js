@@ -34893,7 +34893,7 @@ const App = React.createClass({displayName: "App",
 	getInitialState:function(){
 		return({
 			display:"main",
-			roomInfo:{roomName:"default",handleName:"default",description:"default",id:"defid000"}
+			roomInfo:new Object()
 		});
 	},
 
@@ -34911,7 +34911,9 @@ const App = React.createClass({displayName: "App",
 			return(React.createElement(Youtuber, {roomInfo: this.state.roomInfo}));
 		}
 		else if(this.state.display==="observer"){
-			return(React.createElement(Observer, {roomInfo: this.state.roomInfo}));
+			return(React.createElement(Observer, {
+						roomInfo: this.state.roomInfo}
+				   ));
 		}
 		else{
 			return(
@@ -34933,17 +34935,28 @@ const ReactDOM = require('react-dom');
 
 const Input = require('react-bootstrap').Input;
 const ButtonInput = require('react-bootstrap').ButtonInput;
+const Panel = require('react-bootstrap').Panel;
+const Button = require('react-bootstrap').Button;
 
 const CreateRoom = React.createClass({displayName: "CreateRoom",
+	
+	back:function(){
+		this.props.changeDisplay("main");
+	},
 
 	render:function(){
 		return(
 
-			React.createElement("form", {onSubmit: this.handleSubmit}, 
-				React.createElement(Input, {type: "text", label: "Room name", placeholder: "Enter room's name", ref: "roomName"}), 
-				React.createElement(Input, {type: "text", label: "Handle name", placeholder: "Enter your handle name", ref: "handleName"}), 
-				React.createElement(Input, {type: "text", label: "Description", placeholder: "Enter your room's description", ref: "description"}), 
-				React.createElement(ButtonInput, {type: "submit", value: "CreateRoom!", bsSize: "large"})
+			React.createElement(Panel, null, 
+				React.createElement("form", {onSubmit: this.handleSubmit}, 
+					React.createElement(Input, {type: "text", label: "Room name", placeholder: "Enter room's name", ref: "roomName"}), 
+					React.createElement(Input, {type: "text", label: "Handle name", placeholder: "Enter your handle name", ref: "handleName"}), 
+					React.createElement(Input, {type: "textarea", label: "Description", placeholder: "Enter your room's description", ref: "description"}), 
+					React.createElement(ButtonInput, {type: "submit", value: "CreateRoom!", bsSize: "large", bsStyle: "primary"})
+				), 
+				React.createElement(Button, {bsStyle: "primary", onClick: this.back}, 
+					"back"
+				)
 			)
 
 		);
@@ -34970,10 +34983,16 @@ const ReactDOM = require('react-dom');
 
 const Rooms = require('./rooms.jsx');
 
+const Panel = require('react-bootstrap').Panel; 
+const Button = require('react-bootstrap').Button;
+
 const EnterRoom = React.createClass({displayName: "EnterRoom",
 
 	getInitialState:function(){
-		return({roomInfos:new Object()});
+		return({
+			roomInfos:new Object(),
+			ws:new WebSocket("ws:"+window.location.host+"/getRoomInfo")
+		});
 	},
 
 	onClickHandler:function(e){
@@ -34983,33 +35002,47 @@ const EnterRoom = React.createClass({displayName: "EnterRoom",
 		}
 	},
 
+	reload:function(){
+		this.state.ws.send("r");
+	},
+
+	back:function(){
+		this.state.ws.close();
+		this.props.changeDisplay("main");
+	},
+
 	render:function(){
 		
 		return(
-			React.createElement("div", null, 
+			React.createElement(Panel, null, 
 				React.createElement(Rooms, {
 					roomInfos: this.state.roomInfos, 
 					onSubmitHandler: this.props.onSubmitHandler, 
 					changeDisplay: this.props.changeDisplay}
+				), 
+				React.createElement(Button, {bsStyle: "primary", onClick: this.reload}, 
+					"reload"
+				), 
+				React.createElement(Button, {bsStyle: "primary", onClick: this.back}, 
+					"back"
 				)
 			)
 		);
 	},
 
 	componentDidMount:function(){
-		
-		var ws = new WebSocket("ws:"+window.location.host+"/getRoomInfo");
-		ws.onmessage = function(e){
+
+		this.state.ws.onmessage = function(e){
 			this.setState({roomInfos:JSON.parse(e.data)});
 		}.bind(this);
-	
+		this.state.ws.onopen=function(e){e.target.send("t");};
 	}
 
 });
 
 module.exports = EnterRoom;
 
-},{"./rooms.jsx":410,"react":401,"react-dom":245}],405:[function(require,module,exports){
+},{"./rooms.jsx":410,"react":401,"react-bootstrap":72,"react-dom":245}],405:[function(require,module,exports){
 const React = require('react');
 const ReactDOM = require('react-dom');
 
@@ -35049,10 +35082,6 @@ const MainFrame = React.createClass({displayName: "MainFrame",
 	render:function(){
 		return(
 			React.createElement("div", null, 
-				React.createElement("h1", null, 
-					"test"
-				), 
-
 				React.createElement(Grid, null, 
 					React.createElement(Row, null, 
 						React.createElement(Col, {md: 6}, 
@@ -35106,7 +35135,6 @@ const Observer = React.createClass({displayName: "Observer",
 	},
 
 	componentDidMount:function(){
-		console.log(this.props.roomInfo);
 		p2pClient(this.props.roomInfo);
 	},
 
@@ -35136,7 +35164,7 @@ function error(e){
 }
 
 function createPeerConnection(){
-	pc = new RTCPeerConnection(new Object());
+	pc = new RTCPeerConnection({iceServers:[{url:"stun:stun.1.google.com:19302"}]});
 	pc.onicecandidate = onIceCandidate;
 	pc.onaddstream = onRemoteStreamAdded;
 
@@ -35182,7 +35210,6 @@ function onCandidate(message){
 
 function sendMessage(message){
 	message = JSON.stringify(message);	
-	console.log(message.slice(0,1)+"\"to\":\""+to+"\",\"from\":\""+id+"\","+message.slice(1));
 	ws.send(message.slice(0,1)+"\"to\":\""+to+"\",\"from\":\""+id+"\","+message.slice(1));
 }
 
@@ -35231,13 +35258,12 @@ function gotUserMedia(stream){
 }
 
 function createPeerConnection(){
-	var pc = new RTCPeerConnection(new Object());
+	var pc = new RTCPeerConnection({iceServers:[{url:"stun:stun.1.google.com:19302"}]});
 	pc.addStream(localMediaStream);
 	return pc;
 }
 
 function onMessage(message){
-	console.log(message.data);
 	message = JSON.parse(message.data);
 	if(!message.to === id)return console.log("not to == id");
 	if(message.from){
@@ -35313,19 +35339,21 @@ const Rooms = React.createClass({displayName: "Rooms",
 					var info = this.props.roomInfos[k];
 
 					return(
-						React.createElement(Button, {onClick: this.onClickHandler(info).bind(this)}, 
-							React.createElement(Jumbotron, null, 
-								React.createElement("h2", null, 
-									info.roomName
+							React.createElement(Jumbotron, {key: k}, 
+								React.createElement("h2", {className: "container"}, 
+									"Room Name:"+info.roomName
 								), 
-								React.createElement("h4", null, 
-									info.handleName
+								React.createElement("h4", {className: "container"}, 
+									"host:"+info.handleName
 								), 
-								React.createElement("h3", null, 
-									info.description
+								React.createElement("h3", {className: "container"}, 
+									"description:"+info.description
+								), 
+
+								React.createElement(Button, {className: "container", onClick: this.onClickHandler(info).bind(this), bsStyle: "primary"}, 
+									"Enter"
 								)
 							)
-						)
 					);
 
 
@@ -35363,7 +35391,6 @@ const Youtuber = React.createClass({displayName: "Youtuber",
 	},
 
 	componentDidMount:function(){
-		console.log(this.props.roomInfo);
 		p2pHost(this.props.roomInfo);
 	},
 

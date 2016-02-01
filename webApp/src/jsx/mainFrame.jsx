@@ -18,10 +18,6 @@ const MainFrame = React.createClass({
 	render:function(){
 		return(
 			<div>
-				<h1>
-					test
-				</h1>
-
 				<Grid>
 					<Row>
 						<Col md={6}>

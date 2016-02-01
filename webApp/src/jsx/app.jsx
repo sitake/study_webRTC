@@ -21,7 +21,7 @@ const App = React.createClass({
 	getInitialState:function(){
 		return({
 			display:"main",
-			roomInfo:{roomName:"default",handleName:"default",description:"default",id:"defid000"}
+			roomInfo:new Object()
 		});
 	},
 
@@ -39,7 +39,9 @@ const App = React.createClass({
 			return(<Youtuber roomInfo={this.state.roomInfo}/>);
 		}
 		else if(this.state.display==="observer"){
-			return(<Observer roomInfo={this.state.roomInfo}/>);
+			return(<Observer 
+						roomInfo={this.state.roomInfo}
+				   />);
 		}
 		else{
 			return(

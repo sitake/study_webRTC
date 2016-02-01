@@ -17,7 +17,7 @@ function error(e){
 }
 
 function createPeerConnection(){
-	pc = new RTCPeerConnection(new Object());
+	pc = new RTCPeerConnection({iceServers:[{url:"stun:stun.1.google.com:19302"}]});
 	pc.onicecandidate = onIceCandidate;
 	pc.onaddstream = onRemoteStreamAdded;
 
@@ -63,7 +63,6 @@ function onCandidate(message){
 
 function sendMessage(message){
 	message = JSON.stringify(message);	
-	console.log(message.slice(0,1)+"\"to\":\""+to+"\",\"from\":\""+id+"\","+message.slice(1));
 	ws.send(message.slice(0,1)+"\"to\":\""+to+"\",\"from\":\""+id+"\","+message.slice(1));
 }
 

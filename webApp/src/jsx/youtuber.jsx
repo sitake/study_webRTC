@@ -16,7 +16,6 @@ const Youtuber = React.createClass({
 	},
 
 	componentDidMount:function(){
-		console.log(this.props.roomInfo);
 		p2pHost(this.props.roomInfo);
 	},
 

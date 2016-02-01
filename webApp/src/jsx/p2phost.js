@@ -37,13 +37,12 @@ function gotUserMedia(stream){
 }
 
 function createPeerConnection(){
-	var pc = new RTCPeerConnection(new Object());
+	var pc = new RTCPeerConnection({iceServers:[{url:"stun:stun.1.google.com:19302"}]});
 	pc.addStream(localMediaStream);
 	return pc;
 }
 
 function onMessage(message){
-	console.log(message.data);
 	message = JSON.parse(message.data);
 	if(!message.to === id)return console.log("not to == id");
 	if(message.from){

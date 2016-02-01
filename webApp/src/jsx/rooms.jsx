@@ -27,19 +27,21 @@ const Rooms = React.createClass({
 					var info = this.props.roomInfos[k];
 
 					return(
-						<Button onClick={this.onClickHandler(info).bind(this)} >
-							<Jumbotron>
-								<h2>
-									{info.roomName}
+							<Jumbotron key={k}>
+								<h2 className="container">
+									{"Room Name:"+info.roomName}
 								</h2>
-								<h4>
-									{info.handleName}
+								<h4 className="container">
+									{"host:"+info.handleName}
 								</h4>
-								<h3>
-									{info.description}
+								<h3 className="container">
+									{"description:"+info.description}
 								</h3>
+
+								<Button className="container" onClick={this.onClickHandler(info).bind(this)} bsStyle="primary">
+									Enter
+								</Button>
 							</Jumbotron>
-						</Button>
 					);
 
 
