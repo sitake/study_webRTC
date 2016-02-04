@@ -9,8 +9,7 @@ const Youtuber = React.createClass({
 	render:function(){
 		return(
 			<div>
-				<video id="localVideo" autoPlay={true}></video>
-				<audio id="localAudio" autoPlay={true}></audio>
+				<video id="localVideo" autoPlay={true} muted={true}></video>
 			</div>
 		);
 	},

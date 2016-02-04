@@ -34879,14 +34879,22 @@ const EnterRoom = require('./enterRoom.jsx');
 
 const Header = require('./header.jsx');
 
-const panels = {main:Main,createRoom:CreateRoom,enterRoom:EnterRoom};
-const headers = {	main:"Welcome, this is Video Streaming Tool",
-					createRoom:"Please input your room's information",
-					enterRoom:"Choose room"
-};
-
 const Youtuber = require('./youtuber.jsx');
 const Observer = require('./observer.jsx');
+
+const panels = {	main:Main,
+					createRoom:CreateRoom,
+					enterRoom:EnterRoom,
+					youtuber:Youtuber,
+					observer:Observer
+};
+const headers = {	main:"Welcome",
+					createRoom:"Please enter the information of your room",
+					enterRoom:"Please select a room",
+					youtuber:"",
+					observer:""
+};
+
 
 const App = React.createClass({displayName: "App",
 
@@ -34907,22 +34915,13 @@ const App = React.createClass({displayName: "App",
 
 	render:function(){
 		var Display = this.props.panels[this.state.display];
-		if(this.state.display === "youtuber"){
-			return(React.createElement(Youtuber, {roomInfo: this.state.roomInfo}));
-		}
-		else if(this.state.display==="observer"){
-			return(React.createElement(Observer, {
-						roomInfo: this.state.roomInfo}
-				   ));
-		}
-		else{
 			return(
 				React.createElement("div", null, 
 					React.createElement(Header, {title: this.props.headers[this.state.display]}), 
-					React.createElement(Display, {changeDisplay: this.changeDisplay, onSubmitHandler: this.setRoomInfo})
+					React.createElement(Display, {changeDisplay: this.changeDisplay, onSubmitHandler: this.setRoomInfo, roomInfo: this.state.roomInfo})
 				)
 			);
-		}
+		
 	}
 });
 
@@ -35128,8 +35127,7 @@ const Observer = React.createClass({displayName: "Observer",
 	render:function(){
 		return(
 			React.createElement("div", null, 
-				React.createElement("video", {id: "remoteVideo", autoPlay: true}), 
-				React.createElement("audio", {id: "remoteAudio", autoPlay: true})
+				React.createElement("video", {id: "remoteVideo", autoPlay: true})
 			)
 		);
 	},
@@ -35179,7 +35177,6 @@ function onIceCandidate(e){
 
 function onRemoteStreamAdded(e){
 	document.getElementById("remoteVideo").src = window.URL.createObjectURL(e.stream);
-	document.getElementById("remoteAudio").src = window.URL.createObjectURL(e.stream);
 }
 
 function onMessage(message){
@@ -35228,11 +35225,6 @@ navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia
 
 var id = roomInfo.id;
 var ws = new WebSocket("ws:"+window.location.host+"/youtuber"+id);
-var ws_info = new WebSocket("ws:"+window.location.host+"/roominfo"+id);
-
-ws_info.onopen = function(){
-	ws_info.send(JSON.stringify(roomInfo));
-}
 
 ws.onopen = requireUserMedia;
 ws.onmessage = onMessage;
@@ -35254,7 +35246,11 @@ function requireUserMedia(){
 function gotUserMedia(stream){
 	localMediaStream = stream;
 	document.getElementById("localVideo").src = window.URL.createObjectURL(stream);
-	document.getElementById("localAudio").src = window.URL.createObjectURL(stream);
+	
+	var ws_info = new WebSocket("ws:"+window.location.host+"/roominfo"+id);
+	ws_info.onopen = function(){
+	ws_info.send(JSON.stringify(roomInfo));
+	}
 }
 
 function createPeerConnection(){
@@ -35384,8 +35380,7 @@ const Youtuber = React.createClass({displayName: "Youtuber",
 	render:function(){
 		return(
 			React.createElement("div", null, 
-				React.createElement("video", {id: "localVideo", autoPlay: true}), 
-				React.createElement("audio", {id: "localAudio", autoPlay: true})
+				React.createElement("video", {id: "localVideo", autoPlay: true, muted: true})
 			)
 		);
 	},

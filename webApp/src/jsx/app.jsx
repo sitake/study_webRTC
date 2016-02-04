@@ -7,14 +7,22 @@ const EnterRoom = require('./enterRoom.jsx');
 
 const Header = require('./header.jsx');
 
-const panels = {main:Main,createRoom:CreateRoom,enterRoom:EnterRoom};
-const headers = {	main:"Welcome, this is Video Streaming Tool",
-					createRoom:"Please input your room's information",
-					enterRoom:"Choose room"
-};
-
 const Youtuber = require('./youtuber.jsx');
 const Observer = require('./observer.jsx');
+
+const panels = {	main:Main,
+					createRoom:CreateRoom,
+					enterRoom:EnterRoom,
+					youtuber:Youtuber,
+					observer:Observer
+};
+const headers = {	main:"Welcome",
+					createRoom:"Please enter the information of your room",
+					enterRoom:"Please select a room",
+					youtuber:"",
+					observer:""
+};
+
 
 const App = React.createClass({
 
@@ -35,22 +43,13 @@ const App = React.createClass({
 
 	render:function(){
 		var Display = this.props.panels[this.state.display];
-		if(this.state.display === "youtuber"){
-			return(<Youtuber roomInfo={this.state.roomInfo}/>);
-		}
-		else if(this.state.display==="observer"){
-			return(<Observer 
-						roomInfo={this.state.roomInfo}
-				   />);
-		}
-		else{
 			return(
 				<div>
 					<Header title={this.props.headers[this.state.display]} />
-					<Display changeDisplay={this.changeDisplay} onSubmitHandler={this.setRoomInfo} />
+					<Display changeDisplay={this.changeDisplay} onSubmitHandler={this.setRoomInfo} roomInfo={this.state.roomInfo}/>
 				</div>
 			);
-		}
+		
 	}
 });
 

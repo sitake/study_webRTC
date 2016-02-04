@@ -9,7 +9,6 @@ const Observer = React.createClass({
 		return(
 			<div>
 				<video id="remoteVideo" autoPlay={true}></video>
-				<audio id="remoteAudio" autoPlay={true}></audio>
 			</div>
 		);
 	},

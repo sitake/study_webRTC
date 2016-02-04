@@ -7,11 +7,6 @@ navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia
 
 var id = roomInfo.id;
 var ws = new WebSocket("ws:"+window.location.host+"/youtuber"+id);
-var ws_info = new WebSocket("ws:"+window.location.host+"/roominfo"+id);
-
-ws_info.onopen = function(){
-	ws_info.send(JSON.stringify(roomInfo));
-}
 
 ws.onopen = requireUserMedia;
 ws.onmessage = onMessage;
@@ -33,7 +28,11 @@ function requireUserMedia(){
 function gotUserMedia(stream){
 	localMediaStream = stream;
 	document.getElementById("localVideo").src = window.URL.createObjectURL(stream);
-	document.getElementById("localAudio").src = window.URL.createObjectURL(stream);
+	
+	var ws_info = new WebSocket("ws:"+window.location.host+"/roominfo"+id);
+	ws_info.onopen = function(){
+	ws_info.send(JSON.stringify(roomInfo));
+	}
 }
 
 function createPeerConnection(){

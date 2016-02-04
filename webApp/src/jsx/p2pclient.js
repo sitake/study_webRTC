@@ -32,7 +32,6 @@ function onIceCandidate(e){
 
 function onRemoteStreamAdded(e){
 	document.getElementById("remoteVideo").src = window.URL.createObjectURL(e.stream);
-	document.getElementById("remoteAudio").src = window.URL.createObjectURL(e.stream);
 }
 
 function onMessage(message){
