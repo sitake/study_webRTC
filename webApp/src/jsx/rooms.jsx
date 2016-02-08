@@ -9,9 +9,7 @@ const Rooms = React.createClass({
 
 	onClickHandler:function(e){
 		return function(){
-			this.props.onSubmitHandler(e);
-			this.props.changeDisplay("observer");
-			console.log(e);
+			this.props.clickHandler(e);
 		}.bind(this);
 	},
 

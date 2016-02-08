@@ -16,17 +16,17 @@ class YoutubersSocket(tornado.websocket.WebSocketHandler):
 
 	def open(self,ids):
 	    print("youtuber is comming!")
+	    print("id:"+ids)
 	    self.__class__.youtubers[ids] = self
             self.ids=ids
 
 	@classmethod
 	def _send_message(clt,message):
-		print("to youtuber:"+message)
+#		print("to youtuber:"+message)
 		clt.youtubers.get(json.loads(message).get("to")).write_message(message)
 
 	def on_message(self,message):
 		ObserversSocket._send_message(message)
-		print(json.loads(message).get("type"))
 
 	def on_close(self):
 		print("youtuber is got out!")
@@ -44,7 +44,7 @@ class ObserversSocket(tornado.websocket.WebSocketHandler):
 
 	@classmethod
 	def _send_message(clt,message):
-		print("to observers:"+message)
+#		print("to observers:"+message)
 		clt.observers.get(json.loads(message).get("to")).write_message(message)
 
 	def on_message(self,message):
@@ -62,9 +62,8 @@ class RoomInfoSocket(tornado.websocket.WebSocketHandler):
         self.ids = ids
 
     def on_message(self,message):
-        print(message)
-        print(json.loads(message))
         self.__class__.roominfos[self.ids] = json.loads(message)
+        GetRoomInfoSocket.reloads()
 
     @classmethod
     def _get_roomInfos(clt):
@@ -72,12 +71,29 @@ class RoomInfoSocket(tornado.websocket.WebSocketHandler):
 
     def on_close(self):
         self.__class__.roominfos.pop(self.ids)
+        GetRoomInfoSocket.reloads()
 
 class GetRoomInfoSocket(tornado.websocket.WebSocketHandler):
-    
+
+    instances = []
+
+    def open(self):
+        self.__class__.instances.append(self)
+
     def on_message(self,message):
-        print(json.dumps(RoomInfoSocket._get_roomInfos()))
+        self.sendRoomInfo()
+
+    def sendRoomInfo(self):
         self.write_message(json.dumps(RoomInfoSocket._get_roomInfos()))
+
+    @classmethod
+    def reloads(clt):
+        map(lambda soc:soc.sendRoomInfo(),clt.instances)
+        
+
+    def on_close(self):
+        self.__class__.instances.remove(self)
+        print("checkout")
 
 application = tornado.web.Application([
 	(r"/",MainHandler),

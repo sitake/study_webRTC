@@ -40,11 +40,6 @@ const MainFrame = React.createClass({
 						</Col>
 					</Row>
 				</Grid>
-
-
-
-				<video id="localVideo" autoPlay="true" control></video>
-				<audio id="localAudio"></audio>
 			</div>
 		);
 	}

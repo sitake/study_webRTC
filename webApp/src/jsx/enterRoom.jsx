@@ -16,10 +16,9 @@ const EnterRoom = React.createClass({
 	},
 
 	onClickHandler:function(e){
-		return function(){
-			this.props.onSubmitHandler(e);
-			this.props.changeDisplay("observer");
-		}
+		this.state.ws.close();
+		this.props.onSubmitHandler(e);
+		this.props.changeDisplay("observer");
 	},
 
 	reload:function(){
@@ -37,8 +36,7 @@ const EnterRoom = React.createClass({
 			<Panel>
 				<Rooms 
 					roomInfos={this.state.roomInfos} 
-					onSubmitHandler={this.props.onSubmitHandler}
-					changeDisplay={this.props.changeDisplay}
+					clickHandler={this.onClickHandler}
 				/>
 				<Button bsStyle="primary" onClick={this.reload}>
 					reload

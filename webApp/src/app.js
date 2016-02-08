@@ -34995,10 +34995,9 @@ const EnterRoom = React.createClass({displayName: "EnterRoom",
 	},
 
 	onClickHandler:function(e){
-		return function(){
-			this.props.onSubmitHandler(e);
-			this.props.changeDisplay("observer");
-		}
+		this.state.ws.close();
+		this.props.onSubmitHandler(e);
+		this.props.changeDisplay("observer");
 	},
 
 	reload:function(){
@@ -35016,8 +35015,7 @@ const EnterRoom = React.createClass({displayName: "EnterRoom",
 			React.createElement(Panel, null, 
 				React.createElement(Rooms, {
 					roomInfos: this.state.roomInfos, 
-					onSubmitHandler: this.props.onSubmitHandler, 
-					changeDisplay: this.props.changeDisplay}
+					clickHandler: this.onClickHandler}
 				), 
 				React.createElement(Button, {bsStyle: "primary", onClick: this.reload}, 
 					"reload"
@@ -35102,12 +35100,7 @@ const MainFrame = React.createClass({displayName: "MainFrame",
 							)
 						)
 					)
-				), 
-
-
-
-				React.createElement("video", {id: "localVideo", autoPlay: "true", control: true}), 
-				React.createElement("audio", {id: "localAudio"})
+				)
 			)
 		);
 	}
@@ -35317,9 +35310,7 @@ const Rooms = React.createClass({displayName: "Rooms",
 
 	onClickHandler:function(e){
 		return function(){
-			this.props.onSubmitHandler(e);
-			this.props.changeDisplay("observer");
-			console.log(e);
+			this.props.clickHandler(e);
 		}.bind(this);
 	},
 
