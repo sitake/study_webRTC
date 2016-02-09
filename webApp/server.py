@@ -18,7 +18,7 @@ class YoutubersSocket(tornado.websocket.WebSocketHandler):
 	    print("youtuber is comming!")
 	    print("id:"+ids)
 	    self.__class__.youtubers[ids] = self
-            self.ids=ids
+	    self.ids = ids
 
 	@classmethod
 	def _send_message(clt,message):
@@ -30,8 +30,7 @@ class YoutubersSocket(tornado.websocket.WebSocketHandler):
 
 	def on_close(self):
 		print("youtuber is got out!")
-                self.__class__.youtubers.pop(self.ids)
-                
+		self.__class__.youtubers.pop(self.ids)
 class ObserversSocket(tornado.websocket.WebSocketHandler):
 
 	observers = dict()

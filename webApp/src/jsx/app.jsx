@@ -42,10 +42,10 @@ const App = React.createClass({
 	},
 
 	render:function(){
-		var Display = this.props.panels[this.state.display];
+		var Display = panels[this.state.display];
 			return(
 				<div>
-					<Header title={this.props.headers[this.state.display]} />
+					<Header title={headers[this.state.display]} />
 					<Display changeDisplay={this.changeDisplay} onSubmitHandler={this.setRoomInfo} roomInfo={this.state.roomInfo}/>
 				</div>
 			);
@@ -53,5 +53,6 @@ const App = React.createClass({
 	}
 });
 
+ReactDOM.render(<App/>,document.getElementById('app'));
 
-ReactDOM.render(<App panels={panels} headers={headers}/>,document.getElementById('app'));
+module.exports=App;

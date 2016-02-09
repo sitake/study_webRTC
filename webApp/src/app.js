@@ -34914,10 +34914,10 @@ const App = React.createClass({displayName: "App",
 	},
 
 	render:function(){
-		var Display = this.props.panels[this.state.display];
+		var Display = panels[this.state.display];
 			return(
 				React.createElement("div", null, 
-					React.createElement(Header, {title: this.props.headers[this.state.display]}), 
+					React.createElement(Header, {title: headers[this.state.display]}), 
 					React.createElement(Display, {changeDisplay: this.changeDisplay, onSubmitHandler: this.setRoomInfo, roomInfo: this.state.roomInfo})
 				)
 			);
@@ -34925,8 +34925,9 @@ const App = React.createClass({displayName: "App",
 	}
 });
 
+ReactDOM.render(React.createElement(App, null),document.getElementById('app'));
 
-ReactDOM.render(React.createElement(App, {panels: panels, headers: headers}),document.getElementById('app'));
+module.exports=App;
 
 },{"./createRoom.jsx":403,"./enterRoom.jsx":404,"./header.jsx":405,"./mainFrame.jsx":406,"./observer.jsx":407,"./youtuber.jsx":411,"react":401,"react-dom":245}],403:[function(require,module,exports){
 const React = require('react');
